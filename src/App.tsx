@@ -1,8 +1,11 @@
+import { AppRoutes } from "./routes/AppRoutes";
+import { AuthProvider } from "./contexts/AuthContext";
+
 function App() {
   return (
-    <div>
-      <h1>DolphinFast</h1>
-    </div>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
