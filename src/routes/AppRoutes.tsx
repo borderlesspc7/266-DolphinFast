@@ -1,20 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { paths } from "./paths";
 import { ProtectedRoute } from "./ProtectedRoutes";
+import { Login } from "../pages/Login/Login";
+import { Register } from "../pages/Register/Register";
 
 export const AppRoutes = () => {
-  const Home = () => {
-    return <div>Home</div>;
-  };
-
-  const Login = () => {
-    return <div>Login</div>;
-  };
-
-  const Register = () => {
-    return <div>Register</div>;
-  };
-
   const Menu = () => {
     return <div>Menu</div>;
   };
@@ -22,7 +12,7 @@ export const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path={paths.home} element={<Home />} />
+        <Route path={paths.home} element={<Login />} />
         <Route path={paths.login} element={<Login />} />
         <Route path={paths.register} element={<Register />} />
         <Route
