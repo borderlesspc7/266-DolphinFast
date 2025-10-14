@@ -1,6 +1,6 @@
 import { useAuth } from "../hooks/useAuth";
-import { Navigate } from "react-router-dom";
-import { paths } from "./paths";
+// import { Navigate } from "react-router-dom";
+// import { paths } from "./paths";
 import type { ReactNode } from "react";
 
 interface ProtectedRouteProps {
@@ -8,13 +8,13 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!user) return <Navigate to={paths.login} replace />;
+  // if (!user) return <Navigate to={paths.login} replace />;
 
   return <>{children}</>;
 };

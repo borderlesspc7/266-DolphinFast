@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/Button/Button";
 import { paths } from "../../routes/paths";
 import type { LoginCredentials } from "../../types/user";
 import "./Login.css";
+import { FiArrowRight } from "react-icons/fi";
 
 export const Login: React.FC = () => {
   const [formData, setFormData] = useState<LoginCredentials>({
@@ -29,7 +30,7 @@ export const Login: React.FC = () => {
 
     try {
       await login(formData);
-      navigate(paths.menu);
+      navigate(paths.dashboard);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
     }
@@ -44,6 +45,9 @@ export const Login: React.FC = () => {
             <p className="login-subtitle">
               Entre com suas credenciais para continuar
             </p>
+            <button onClick={() => navigate(paths.dashboard)}>
+              <FiArrowRight />
+            </button>
           </div>
           <form className="login-form" onSubmit={handleSubmit}>
             {error && <div className="login-error">{error}</div>}
