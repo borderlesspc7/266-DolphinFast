@@ -5,6 +5,7 @@ import { Login } from "../pages/Login/Login";
 import { Register } from "../pages/Register/Register";
 import { Layout } from "../components/layout/Layout/Layout";
 import { Dashboard } from "../components/dashboard/Dashboard";
+import CRM from "../pages/CRM/CRM";
 
 export const AppRoutes = () => {
   const AreaCliente = () => {
@@ -21,15 +22,6 @@ export const AppRoutes = () => {
       <div style={{ padding: "20px" }}>
         <h1>PDV</h1>
         <p>Ponto de venda e controle de transações</p>
-      </div>
-    );
-  };
-
-  const CRM = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>CRM</h1>
-        <p>Customer Relationship Management</p>
       </div>
     );
   };

@@ -11,7 +11,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return null; // evita travar telas internas com loading infinito
   }
 
   // if (!user) return <Navigate to={paths.login} replace />;
