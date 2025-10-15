@@ -69,7 +69,7 @@ export const Register: React.FC = () => {
 
     try {
       await register(formData);
-      navigate(paths.menu);
+      navigate(paths.dashboard);
     } catch (error) {
       console.error("Erro ao registrar usuário:", error);
     }
