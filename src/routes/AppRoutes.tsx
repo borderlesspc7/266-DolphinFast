@@ -6,6 +6,7 @@ import { Register } from "../pages/Register/Register";
 import { Layout } from "../components/layout/Layout/Layout";
 import { Dashboard } from "../components/dashboard/Dashboard";
 import CRM from "../pages/CRM/CRM";
+import RH from "../pages/RH/RH";
 
 export const AppRoutes = () => {
   const AreaCliente = () => {
@@ -31,15 +32,6 @@ export const AppRoutes = () => {
       <div style={{ padding: "20px" }}>
         <h1>Gestão Financeira e Contábil</h1>
         <p>Controle financeiro e contabilidade</p>
-      </div>
-    );
-  };
-
-  const RecursosHumanos = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>Recursos Humanos e Ponto</h1>
-        <p>Gestão de colaboradores e controle de ponto</p>
       </div>
     );
   };
@@ -132,7 +124,7 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Layout>
-                <RecursosHumanos />
+                <RH />
               </Layout>
             </ProtectedRoute>
           }

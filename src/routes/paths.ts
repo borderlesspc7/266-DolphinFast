@@ -2,7 +2,6 @@ export const paths = {
   home: "/",
   login: "/login",
   register: "/register",
-
   dashboard: "/dashboard",
   areaCliente: "/area-cliente",
   pdv: "/pdv",
