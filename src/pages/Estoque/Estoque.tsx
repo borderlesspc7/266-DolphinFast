@@ -15,6 +15,7 @@ import type {
   StockMovement,
   StockMovementFormData,
   StockAlert,
+  InventoryReport,
 } from "../../types/estoque";
 import {
   createProduct,
@@ -39,7 +40,7 @@ const Estoque: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [alerts, setAlerts] = useState<StockAlert[]>([]);
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<InventoryReport | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -256,18 +257,8 @@ const Estoque: React.FC = () => {
                 onEdit={handleEditProduct}
                 onDelete={handleDeleteProduct}
                 onViewMovements={handleViewMovements}
+                onAddNew={() => setShowProductForm(true)}
               />
-            )}
-            {!showProductForm && (
-              <div className="tab-actions">
-                <button
-                  onClick={() => setShowProductForm(true)}
-                  className="btn-primary"
-                >
-                  <FiPackage size={16} />
-                  Novo Produto
-                </button>
-              </div>
             )}
           </div>
         )}
@@ -353,7 +344,7 @@ const Estoque: React.FC = () => {
                         </thead>
                         <tbody>
                           {reportData.topSellingProducts.map(
-                            (item: any, index: number) => (
+                            (item, index: number) => (
                               <tr key={index}>
                                 <td>{item.productName}</td>
                                 <td>{item.quantitySold}</td>
@@ -381,7 +372,7 @@ const Estoque: React.FC = () => {
                         </thead>
                         <tbody>
                           {reportData.stockByCategory.map(
-                            (item: any, index: number) => (
+                            (item, index: number) => (
                               <tr key={index}>
                                 <td>{item.category}</td>
                                 <td>{item.quantity}</td>

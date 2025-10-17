@@ -14,6 +14,7 @@ interface ProductListProps {
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   onViewMovements: (product: Product) => void;
+  onAddNew: () => void;
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -21,6 +22,7 @@ const ProductList: React.FC<ProductListProps> = ({
   onEdit,
   onDelete,
   onViewMovements,
+  onAddNew,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -95,22 +97,28 @@ const ProductList: React.FC<ProductListProps> = ({
   return (
     <div className="product-list-container">
       <div className="list-header">
-        <h2>
-          <FiPackage size={24} />
-          Produtos
-        </h2>
-        <div className="header-stats">
-          <div className="stat-item">
-            <span className="stat-label">Total</span>
-            <span className="stat-value">{products.length}</span>
-          </div>
-          <div className="stat-item alert">
-            <span className="stat-label">Estoque Baixo</span>
-            <span className="stat-value">
-              {products.filter((p) => p.currentStock <= p.minStock).length}
-            </span>
+        <div className="header-left">
+          <h2>
+            <FiPackage size={24} />
+            Produtos
+          </h2>
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-label">Total</span>
+              <span className="stat-value">{products.length}</span>
+            </div>
+            <div className="stat-item alert">
+              <span className="stat-label">Estoque Baixo</span>
+              <span className="stat-value">
+                {products.filter((p) => p.currentStock <= p.minStock).length}
+              </span>
+            </div>
           </div>
         </div>
+        <button className="btn-new" onClick={onAddNew}>
+          <FiPackage size={16} />
+          Novo Produto
+        </button>
       </div>
 
       <div className="filters-section">
