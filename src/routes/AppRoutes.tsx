@@ -7,6 +7,7 @@ import { Layout } from "../components/layout/Layout/Layout";
 import { Dashboard } from "../components/dashboard/Dashboard";
 import CRM from "../pages/CRM/CRM";
 import RH from "../pages/RH/RH";
+import Estoque from "../pages/Estoque/Estoque";
 
 export const AppRoutes = () => {
   const AreaCliente = () => {
@@ -32,15 +33,6 @@ export const AppRoutes = () => {
       <div style={{ padding: "20px" }}>
         <h1>Gestão Financeira e Contábil</h1>
         <p>Controle financeiro e contabilidade</p>
-      </div>
-    );
-  };
-
-  const Estoque = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>Estoque</h1>
-        <p>Controle de inventário e produtos</p>
       </div>
     );
   };
