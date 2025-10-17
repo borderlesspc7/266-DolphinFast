@@ -9,7 +9,6 @@ import {
   query,
   where,
   orderBy,
-  limit,
 } from "firebase/firestore";
 import { db } from "../lib/firebaseconfig";
 import type {
