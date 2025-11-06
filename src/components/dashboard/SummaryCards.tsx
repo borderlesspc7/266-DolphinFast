@@ -42,21 +42,41 @@ export const SummaryCards = () => {
       <h2 className="section-title">Resumo</h2>
       <div className="cards-grid">
         {cards.map((card, index) => (
-          <div key={index} className="summary-card">
+          <div
+            key={index}
+            className="summary-card"
+            style={{ "--card-accent-color": card.color } as React.CSSProperties}
+          >
             <div className="card-header">
-              <div
-                className="card-icon"
-                style={{ backgroundColor: `${card.color}15` }}
-              >
-                <card.icon size={24} style={{ color: card.color }} />
+              <div className="card-header-left">
+                <div className={`card-change ${card.changeType}`}>
+                  {card.change}
+                </div>
+                <div
+                  className="card-icon"
+                  style={{
+                    backgroundColor: `${card.color}15`,
+                    boxShadow: `0 4px 12px ${card.color}20`,
+                  }}
+                >
+                  <card.icon size={20} style={{ color: card.color }} />
+                </div>
               </div>
-              <div className={`card-change ${card.changeType}`}>
-                {card.change}
+              <div className="card-header-right">
+                <h3 className="card-title">{card.title}</h3>
+                <p className="card-value">
+                  {card.value.includes("R$") ? (
+                    <>
+                      <span className="currency-symbol">R$</span>{" "}
+                      <span className="currency-value">
+                        {card.value.replace("R$", "").trim()}
+                      </span>
+                    </>
+                  ) : (
+                    card.value
+                  )}
+                </p>
               </div>
-            </div>
-            <div className="card-content">
-              <h3 className="card-title">{card.title}</h3>
-              <p className="card-value">{card.value}</p>
             </div>
           </div>
         ))}

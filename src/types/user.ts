@@ -1,10 +1,19 @@
+// Tipos de usuários
+export type UserRole = "admin" | "gerente" | "caixa" | "lavador" | "user";
+
+// Cliente: user
+// Funcionários: admin, gerente, caixa, lavador
+export type EmployeeRole = "admin" | "gerente" | "caixa" | "lavador";
+
 export interface User {
   uid: string;
   name: string;
   email: string;
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
-  role?: "admin" | "user";
+  lastLogin?: Date;
+  role?: UserRole;
 }
 
 export interface AuthState {
@@ -20,7 +29,26 @@ export interface LoginCredentials {
 
 export interface RegisterCredentials extends LoginCredentials {
   name: string;
-  confirmPassword?: string; // Opcional, usado apenas para validação local
   phone?: string;
-  role?: "admin" | "user";
+  role?: UserRole;
 }
+
+// Utilitários para verificar tipos de usuários
+export const isEmployee = (role?: UserRole): role is EmployeeRole => {
+  return role === "admin" || role === "gerente" || role === "caixa" || role === "lavador";
+};
+
+export const isClient = (role?: UserRole): boolean => {
+  return role === "user";
+};
+
+export const getRoleLabel = (role?: UserRole): string => {
+  const labels: Record<UserRole, string> = {
+    admin: "Administrador",
+    gerente: "Gerente",
+    caixa: "Caixa",
+    lavador: "Lavador",
+    user: "Cliente",
+  };
+  return labels[role || "user"];
+};

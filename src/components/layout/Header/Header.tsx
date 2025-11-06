@@ -1,7 +1,11 @@
 import { FiBell, FiUser } from "react-icons/fi";
+import { useAuth } from "../../../hooks/useAuth";
+import { getRoleLabel } from "../../../types/user";
 import "./Header.css";
 
 export const Header = () => {
+  const { user } = useAuth();
+
   return (
     <header className="header">
       <div className="header-content">
@@ -20,8 +24,8 @@ export const Header = () => {
               <FiUser size={20} />
             </div>
             <div className="user-info">
-              <span className="user-name">Usuário</span>
-              <span className="user-role">Administrador</span>
+              <span className="user-name">{user?.name || "Usuário"}</span>
+              <span className="user-role">{getRoleLabel(user?.role)}</span>
             </div>
           </div>
         </div>

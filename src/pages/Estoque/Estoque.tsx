@@ -42,6 +42,7 @@ const Estoque: React.FC = () => {
   const [alerts, setAlerts] = useState<StockAlert[]>([]);
   const [reportData, setReportData] = useState<InventoryReport | null>(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     loadProducts();
@@ -91,12 +92,93 @@ const Estoque: React.FC = () => {
   // Produtos
   const handleCreateProduct = async (data: ProductFormData) => {
     try {
+      setError("");
+      setSuccessMessage("");
+
+      // Validações
+      if (!data.name || data.name.trim() === "") {
+        setError("O nome do produto é obrigatório");
+        return;
+      }
+
+      if (!data.sku || data.sku.trim() === "") {
+        setError("O SKU é obrigatório");
+        return;
+      }
+
+      if (!data.category || data.category.trim() === "") {
+        setError("A categoria é obrigatória");
+        return;
+      }
+
+      if (data.currentStock < 0) {
+        setError("O estoque atual não pode ser negativo");
+        return;
+      }
+
+      if (data.minStock < 0) {
+        setError("O estoque mínimo não pode ser negativo");
+        return;
+      }
+
+      if (data.maxStock < 0) {
+        setError("O estoque máximo não pode ser negativo");
+        return;
+      }
+
+      if (data.minStock > data.maxStock && data.maxStock > 0) {
+        setError("O estoque mínimo não pode ser maior que o estoque máximo");
+        return;
+      }
+
+      if (data.costPrice < 0) {
+        setError("O preço de custo não pode ser negativo");
+        return;
+      }
+
+      if (data.unitPrice < 0) {
+        setError("O preço de venda não pode ser negativo");
+        return;
+      }
+
+      if (!data.supplier || data.supplier.trim() === "") {
+        setError("O fornecedor é obrigatório");
+        return;
+      }
+
+      // Verificar se já existe um produto com o mesmo SKU
+      const existingProducts = await getAllProducts();
+      const skuExists = existingProducts.some(
+        (p) => p.sku.toLowerCase() === data.sku.toLowerCase()
+      );
+
+      if (skuExists) {
+        setError("Já existe um produto com este SKU");
+        return;
+      }
+
+      // Criar o produto
       await createProduct(data);
+      
+      // Recarregar dados
       await loadProducts();
       await loadAlerts();
-      setShowProductForm(false);
-    } catch {
-      setError("Erro ao criar produto");
+      
+      // Mostrar mensagem de sucesso
+      setSuccessMessage("Produto criado com sucesso!");
+      
+      // Fechar formulário após um breve delay
+      setTimeout(() => {
+        setShowProductForm(false);
+        setSuccessMessage("");
+      }, 1500);
+    } catch (err) {
+      console.error("Erro ao criar produto:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao criar produto. Tente novamente."
+      );
     }
   };
 
@@ -211,6 +293,18 @@ const Estoque: React.FC = () => {
         <div className="error-message">
           {error}
           <button onClick={() => setError("")} className="close-error">
+            ×
+          </button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="success-message">
+          {successMessage}
+          <button
+            onClick={() => setSuccessMessage("")}
+            className="close-success"
+          >
             ×
           </button>
         </div>

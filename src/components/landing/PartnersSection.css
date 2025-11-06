@@ -1,0 +1,247 @@
+.partners-section {
+  background-color: #ffffff;
+  padding: 4rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.partners-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.partners-logos {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.partner-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 80px;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.partner-logo:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Globo Logo */
+.logo-globo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.globo-icon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.globo-circle-outer {
+  width: 32px;
+  height: 32px;
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.globo-square {
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+}
+
+.globo-circle-inner {
+  width: 10px;
+  height: 10px;
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.logo-globo .logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000;
+  text-transform: lowercase;
+  letter-spacing: -0.02em;
+}
+
+/* Estapar Logo */
+.logo-estapar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.estapar-icon svg {
+  filter: grayscale(100%);
+}
+
+.logo-estapar .logo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Maxipark Logo */
+.logo-maxipark {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.maxipark-icon svg {
+  filter: grayscale(100%);
+}
+
+.logo-maxipark .logo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* GAD Logo */
+.logo-gad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gad-icon svg {
+  filter: grayscale(100%);
+}
+
+/* Estudio Car Logo */
+.logo-estudio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.estudio-emblem {
+  width: 70px;
+  height: 70px;
+}
+
+.estudio-emblem svg {
+  filter: grayscale(100%);
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .partners-logos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem 2.5rem;
+    max-width: 900px;
+  }
+
+  .partner-logo {
+    min-height: 75px;
+  }
+}
+
+@media (max-width: 768px) {
+  .partners-section {
+    padding: 3rem 1rem;
+  }
+
+  .partners-logos {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 2rem;
+    max-width: 500px;
+  }
+
+  .partner-logo {
+    min-height: 70px;
+  }
+
+  .partner-logo:nth-child(5) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 220px;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .partners-section {
+    padding: 2.5rem 1rem;
+  }
+
+  .partners-logos {
+    gap: 2rem 1.5rem;
+  }
+
+  .partner-logo {
+    min-height: 60px;
+  }
+
+  .logo-globo .logo-text,
+  .logo-estapar .logo-text,
+  .logo-maxipark .logo-text {
+    font-size: 0.875rem;
+  }
+
+  .globo-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .globo-circle-outer {
+    width: 28px;
+    height: 28px;
+  }
+
+  .globo-square {
+    width: 14px;
+    height: 14px;
+  }
+
+  .globo-circle-inner {
+    width: 9px;
+    height: 9px;
+  }
+
+  .estapar-icon svg,
+  .maxipark-icon svg {
+    width: 35px;
+    height: 35px;
+  }
+
+  .estudio-emblem {
+    width: 60px;
+    height: 60px;
+  }
+
+  .gad-icon svg {
+    width: 50px;
+    height: 35px;
+  }
+}
+

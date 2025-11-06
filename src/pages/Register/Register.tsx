@@ -11,9 +11,8 @@ export const Register: React.FC = () => {
     email: "",
     password: "",
     name: "",
-    confirmPassword: "",
     phone: "",
-    role: "user",
+    role: "user", // Sempre registra como cliente
   });
   const { register, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
@@ -33,14 +32,9 @@ export const Register: React.FC = () => {
     if (
       !formData.email ||
       !formData.password ||
-      !formData.name ||
-      !formData.confirmPassword
+      !formData.name
     ) {
       return "Todos os campos são obrigatórios";
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      return "As senhas não coincidem";
     }
 
     if (formData.password.length < 6) {
@@ -61,15 +55,15 @@ export const Register: React.FC = () => {
       return;
     }
 
-    if (formData.email === "admin@gmail.com") {
-      formData.role = "admin";
-    } else {
-      formData.role = "user";
-    }
-
     try {
-      await register(formData);
-      navigate(paths.dashboard);
+      // Sempre registra como cliente (user)
+      const registerData = {
+        ...formData,
+        role: "user" as const,
+      };
+      await register(registerData);
+      // Clientes sempre são redirecionados para o perfil após registro
+      navigate(paths.profile);
     } catch (error) {
       console.error("Erro ao registrar usuário:", error);
     }
@@ -155,23 +149,6 @@ export const Register: React.FC = () => {
               />
             </div>
 
-            <div className="register-field">
-              <label htmlFor="confirmPassword" className="register-label">
-                Confirmar senha
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="register-input"
-                placeholder="Confirme sua senha"
-              />
-            </div>
-
             <div className="register-buttons">
               <Button
                 type="submit"
@@ -180,8 +157,7 @@ export const Register: React.FC = () => {
                   loading ||
                   !formData.email ||
                   !formData.password ||
-                  !formData.name ||
-                  !formData.confirmPassword
+                  !formData.name
                 }
                 className="register-button"
               >

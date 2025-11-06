@@ -1,5 +1,6 @@
 export const paths = {
   home: "/",
+  landing: "/landing",
   login: "/login",
   register: "/register",
   dashboard: "/dashboard",
@@ -11,4 +12,7 @@ export const paths = {
   estoque: "/estoque",
   planosLavagem: "/planos-lavagem",
   seguranca: "/seguranca",
+  history: "/historico",
+  profile: "/perfil",
+  contactInfo: "/informacoes-contato",
 };

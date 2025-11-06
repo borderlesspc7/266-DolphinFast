@@ -1,13 +1,16 @@
 import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { paths } from "./paths";
+import { isEmployee } from "../types/user";
 import type { ReactNode } from "react";
 
-interface ProtectedRouteProps {
+interface EmployeeProtectedRouteProps {
   children: ReactNode;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const EmployeeProtectedRoute = ({
+  children,
+}: EmployeeProtectedRouteProps) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -30,5 +33,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to={paths.login} replace />;
   }
 
+  // Se for cliente (user), redireciona para o perfil
+  if (!isEmployee(user.role)) {
+    return <Navigate to={paths.profile} replace />;
+  }
+
   return <>{children}</>;
 };
+

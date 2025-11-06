@@ -1,32 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { paths } from "./paths";
 import { ProtectedRoute } from "./ProtectedRoutes";
+import { EmployeeProtectedRoute } from "./EmployeeProtectedRoute";
 import { Login } from "../pages/Login/Login";
 import { Register } from "../pages/Register/Register";
+import { LandingPage } from "../pages/LandingPage/LandingPage";
 import { Layout } from "../components/layout/Layout/Layout";
 import { Dashboard } from "../components/dashboard/Dashboard";
 import CRM from "../pages/CRM/CRM";
 import RH from "../pages/RH/RH";
 import Estoque from "../pages/Estoque/Estoque";
+import History from "../pages/History/History";
+import Profile from "../pages/Profile/Profile";
+import ContactInfo from "../pages/ContactInfo/ContactInfo";
+import PDV from "../pages/PDV/PDV";
 
 export const AppRoutes = () => {
   const AreaCliente = () => {
     return (
-      <div style={{ padding: "20px" }}>
+      <div>
         <h1>Área do Cliente</h1>
         <p>Gerenciamento de clientes e relacionamento</p>
       </div>
     );
   };
 
-  const PDV = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>PDV</h1>
-        <p>Ponto de venda e controle de transações</p>
-      </div>
-    );
-  };
 
   const GestaoFinanceira = () => {
     return (
@@ -58,95 +56,126 @@ export const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path={paths.home} element={<Login />} />
+        <Route path={paths.home} element={<LandingPage />} />
+        <Route path={paths.landing} element={<LandingPage />} />
         <Route path={paths.login} element={<Login />} />
         <Route path={paths.register} element={<Register />} />
         <Route
           path={paths.dashboard}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <Dashboard />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.areaCliente}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <AreaCliente />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.pdv}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <PDV />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.crm}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <CRM />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.gestaoFinanceira}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <GestaoFinanceira />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.recursosHumanos}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <RH />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.estoque}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <Estoque />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.planosLavagem}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <PlanosLavagem />
               </Layout>
-            </ProtectedRoute>
+            </EmployeeProtectedRoute>
           }
         />
         <Route
           path={paths.seguranca}
           element={
-            <ProtectedRoute>
+            <EmployeeProtectedRoute>
               <Layout>
                 <Seguranca />
+              </Layout>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
+          path={paths.history}
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <History />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={paths.profile}
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Profile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={paths.contactInfo}
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ContactInfo />
               </Layout>
             </ProtectedRoute>
           }

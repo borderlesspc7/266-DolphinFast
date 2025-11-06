@@ -6,7 +6,7 @@ import {
   type Unsubscribe,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import type {
   LoginCredentials,
   RegisterCredentials,
@@ -23,7 +23,7 @@ export const authService = {
   async logOut(): Promise<void> {
     try {
       await signOut(auth);
-    } catch (error) {
+    } catch (error: any) {
       const message = getFirebaseErrorMessage(error as string | FirebaseError);
       throw new Error(message);
     }
@@ -42,20 +42,38 @@ export const authService = {
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
       if (!userDoc.exists()) {
-        throw new Error("User not found");
+        throw new Error("Usuário não encontrado no sistema.");
       }
 
-      const userData = userDoc.data() as User;
-
-      const updateUserData = {
+      const userData = userDoc.data();
+      
+      // Converter Timestamp do Firestore para Date
+      const user: User = {
         ...userData,
-        lastLogin: new Date(),
+        uid: userData.uid || firebaseUser.uid,
+        email: userData.email || firebaseUser.email || "",
+        name: userData.name || "",
+        phone: userData.phone || "",
+        createdAt: userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(),
+        updatedAt: userData.updatedAt?.toDate ? userData.updatedAt.toDate() : new Date(),
+        lastLogin: userData.lastLogin?.toDate ? userData.lastLogin.toDate() : undefined,
+        role: userData.role || "user",
       };
 
-      await setDoc(doc(db, "users", firebaseUser.uid), updateUserData);
+      const updateUserData = {
+        ...user,
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
 
-      return updateUserData;
-    } catch (error) {
+      await setDoc(doc(db, "users", firebaseUser.uid), updateUserData, { merge: true });
+
+      return {
+        ...user,
+        lastLogin: new Date(),
+        updatedAt: new Date(),
+      };
+    } catch (error: any) {
       const message = getFirebaseErrorMessage(error as string | FirebaseError);
       throw new Error(message);
     }
@@ -80,18 +98,25 @@ export const authService = {
 
       const firebaseUser = userCredential.user;
 
-      const userData: User = {
+      const userData = {
         uid: firebaseUser.uid,
         email: credentials.email,
         name: credentials.name,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        phone: credentials.phone || "",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
         role: credentials.role || "user", // Role padrão se não especificado
       };
 
       await setDoc(doc(db, "users", firebaseUser.uid), userData);
-      return userData;
-    } catch (error) {
+      
+      // Retornar User com Date convertido
+      return {
+        ...userData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as User;
+    } catch (error: any) {
       const message = getFirebaseErrorMessage(error as string | FirebaseError);
       throw new Error(message);
     }
@@ -110,9 +135,22 @@ export const authService = {
           try {
             const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
             if (userDoc.exists()) {
-              const userData = userDoc.data() as User;
-              console.log("✅ Usuário autenticado:", userData);
-              callback(userData);
+              const userData = userDoc.data();
+              
+              // Converter Timestamp do Firestore para Date
+              const user: User = {
+                uid: userData.uid || firebaseUser.uid,
+                email: userData.email || firebaseUser.email || "",
+                name: userData.name || "",
+                phone: userData.phone || "",
+                createdAt: userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(),
+                updatedAt: userData.updatedAt?.toDate ? userData.updatedAt.toDate() : new Date(),
+                lastLogin: userData.lastLogin?.toDate ? userData.lastLogin.toDate() : undefined,
+                role: userData.role || "user",
+              };
+              
+              console.log("✅ Usuário autenticado:", user);
+              callback(user);
             } else {
               console.log("❌ Usuário não encontrado no Firestore");
               callback(null); // Usuário não encontrado no Firestore

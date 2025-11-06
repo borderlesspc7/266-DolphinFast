@@ -22,6 +22,12 @@ export default function getFirebaseErrorMessage(
     case "auth/invalid-email":
       return "Email inválido. Verifique o formato.";
 
+    case "auth/email-already-in-use":
+      return "Este email já está em uso. Tente fazer login.";
+
+    case "auth/weak-password":
+      return "A senha é muito fraca. Use pelo menos 6 caracteres.";
+
     case "auth/too-many-requests":
       return "Muitas tentativas. Tente novamente em alguns minutos.";
 
@@ -34,7 +40,13 @@ export default function getFirebaseErrorMessage(
     case "auth/invalid-api-key":
       return "Erro de configuração. Entre em contato com o suporte.";
 
+    case "auth/operation-not-allowed":
+      return "Operação não permitida. Entre em contato com o suporte.";
+
     default:
+      if (error?.message) {
+        return error.message;
+      }
       return "Erro inesperado. Tente novamente.";
   }
 }

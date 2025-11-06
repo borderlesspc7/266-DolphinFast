@@ -3,19 +3,12 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "mock-api-key-123456789",
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
-    "dolphinfast-mock.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "dolphinfast-mock",
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
-    "dolphinfast-mock.appspot.com",
-  messagingSenderId:
-    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-  appId:
-    import.meta.env.VITE_FIREBASE_APP_ID ||
-    "1:123456789012:web:abcdef123456789",
+  apiKey: "AIzaSyAnPTDbFVZA9o0rUZi8MdrrFkybwb7Kjqo",
+  authDomain: "goldcury-24db9.firebaseapp.com",
+  projectId: "goldcury-24db9",
+  storageBucket: "goldcury-24db9.firebasestorage.app",
+  messagingSenderId: "872072121733",
+  appId: "1:872072121733:web:9db7270d4c2a3b951408ec",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -25,3 +18,6 @@ export const auth = getAuth(app);
 
 export { app };
 export default firebaseConfig;
+
+
+
