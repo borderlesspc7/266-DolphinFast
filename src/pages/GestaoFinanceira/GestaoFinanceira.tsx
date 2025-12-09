@@ -9,7 +9,6 @@ import {
   FiDownload,
   FiRefreshCw,
   FiShoppingBag,
-  FiFilter,
 } from "react-icons/fi";
 import { getSales, getDailyReport } from "../../services/pdvService";
 import type { Sale, DailyReport } from "../../types/pdv";

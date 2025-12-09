@@ -117,13 +117,15 @@ export const getActiveCustomers = async (): Promise<Customer[]> => {
     );
     const querySnapshot = await getDocs(q);
 
-    // Filtrar apenas clientes ativos em memória
-    return querySnapshot.docs
-      .map((doc) => ({
+    const customers = querySnapshot.docs.map((doc) => {
+      const data = doc.data() as Customer;
+      return {
+        ...data,
         id: doc.id,
-        ...doc.data(),
-      }))
-      .filter((customer) => customer.active === true) as Customer[];
+      };
+    }) as Customer[];
+
+    return customers.filter((customer) => customer.active === true);
   } catch (error) {
     console.error("Erro ao buscar clientes ativos:", error);
     throw new Error("Não foi possível buscar os clientes ativos");

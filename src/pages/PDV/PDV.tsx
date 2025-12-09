@@ -19,7 +19,6 @@ import {
   openCashRegister,
   closeCashRegister,
   addSaleToCashRegister,
-  getDailyReport,
 } from "../../services/pdvService";
 import type { Customer } from "../../types/crm";
 import type { Product as EstoqueProduct } from "../../types/estoque";
@@ -134,11 +133,7 @@ const PDV: React.FC = () => {
 
         if (!cash) {
           // Criar novo caixa se não existir
-          const cashId = await openCashRegister(
-            user.uid,
-            user.name || "",
-            0
-          );
+          await openCashRegister(user.uid, user.name || "", 0);
           cash = await getTodayCashRegister(user.uid);
         }
 

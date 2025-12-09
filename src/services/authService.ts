@@ -45,7 +45,7 @@ export const authService = {
         throw new Error("Usuário não encontrado no sistema.");
       }
 
-      const userData = userDoc.data();
+      const userData = (userDoc.data() || {}) as any;
       
       // Converter Timestamp do Firestore para Date
       const user: User = {
@@ -171,7 +171,7 @@ export const authService = {
 
       // Buscar dados atualizados
       const updatedDoc = await getDoc(userRef);
-      const userData = updatedDoc.data();
+      const userData = (updatedDoc.data() || {}) as any;
       
       // Converter Timestamp do Firestore para Date
       const user: User = {

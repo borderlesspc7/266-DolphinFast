@@ -483,8 +483,6 @@ export const getLateEmployees = async (): Promise<
     }> = [];
 
     const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
 
     activeEmployees.forEach((employee) => {
       const record = recordsMap.get(employee.id);
