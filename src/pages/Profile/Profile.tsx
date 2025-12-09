@@ -1,16 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { FiUser, FiMail, FiPhone, FiEdit2, FiSave, FiX } from "react-icons/fi";
+import { FiUser, FiEdit2, FiSave, FiX, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import "./Profile.css";
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
   });
+
+  // Atualizar formData quando o usuário mudar
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,12 +35,42 @@ const Profile: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      // TODO: Implementar atualização no Firebase
-      console.log("Salvando dados:", formData);
+      setIsSaving(true);
+      setMessage(null);
+
+      // Validação básica
+      if (!formData.name || formData.name.trim().length === 0) {
+        setMessage({ type: "error", text: "O nome é obrigatório" });
+        setIsSaving(false);
+        return;
+      }
+
+      if (formData.name.trim().length < 2) {
+        setMessage({ type: "error", text: "O nome deve ter pelo menos 2 caracteres" });
+        setIsSaving(false);
+        return;
+      }
+
+      // Atualizar perfil
+      await updateUser({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+      });
+
+      setMessage({ type: "success", text: "Perfil atualizado com sucesso!" });
       setIsEditing(false);
-      // await updateUserProfile(formData);
-    } catch (error) {
-      console.error("Erro ao salvar perfil:", error);
+
+      // Limpar mensagem após 3 segundos
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    } catch (error: any) {
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Erro ao salvar perfil. Tente novamente." 
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -38,6 +81,7 @@ const Profile: React.FC = () => {
       phone: user?.phone || "",
     });
     setIsEditing(false);
+    setMessage(null);
   };
 
   return (
@@ -50,6 +94,17 @@ const Profile: React.FC = () => {
       </div>
 
       <div className="profile-content">
+        {message && (
+          <div className={`profile-message profile-message-${message.type}`}>
+            {message.type === "success" ? (
+              <FiCheckCircle size={20} />
+            ) : (
+              <FiAlertCircle size={20} />
+            )}
+            <span>{message.text}</span>
+          </div>
+        )}
+
         <div className="profile-card">
           <div className="profile-card-header">
             <div className="profile-avatar">
@@ -69,9 +124,10 @@ const Profile: React.FC = () => {
                   <button
                     className="profile-save-button"
                     onClick={handleSave}
+                    disabled={isSaving}
                   >
                     <FiSave size={18} />
-                    Salvar
+                    {isSaving ? "Salvando..." : "Salvar"}
                   </button>
                   <button
                     className="profile-cancel-button"
@@ -88,7 +144,6 @@ const Profile: React.FC = () => {
           <div className="profile-form">
             <div className="profile-field">
               <label htmlFor="name" className="profile-label">
-                <FiUser className="profile-label-icon" />
                 Nome Completo
               </label>
               {isEditing ? (
@@ -108,7 +163,6 @@ const Profile: React.FC = () => {
 
             <div className="profile-field">
               <label htmlFor="email" className="profile-label">
-                <FiMail className="profile-label-icon" />
                 Email
               </label>
               {isEditing ? (
@@ -134,7 +188,6 @@ const Profile: React.FC = () => {
 
             <div className="profile-field">
               <label htmlFor="phone" className="profile-label">
-                <FiPhone className="profile-label-icon" />
                 Telefone
               </label>
               {isEditing ? (
@@ -156,7 +209,6 @@ const Profile: React.FC = () => {
 
             <div className="profile-field">
               <label className="profile-label">
-                <FiUser className="profile-label-icon" />
                 Tipo de Usuário
               </label>
               <div className="profile-value profile-role">

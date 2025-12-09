@@ -198,6 +198,23 @@
   border-radius: 8px;
 }
 
+.history-loading {
+  text-align: center;
+  padding: 48px;
+  color: #495057;
+  font-size: 16px;
+}
+
+.history-error {
+  text-align: center;
+  padding: 48px;
+  color: #dc3545;
+  font-size: 16px;
+  background: #f8d7da;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+}
+
 @media (max-width: 768px) {
   .history-page {
     padding: 16px;

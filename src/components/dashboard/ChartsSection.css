@@ -114,6 +114,65 @@
   border-radius: 2px;
 }
 
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.period-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.period-selector button {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.period-selector button:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.period-selector button.active {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.chart-container {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 40px 20px;
+}
+
+.charts-loading,
+.charts-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.charts-error {
+  color: #ef4444;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .charts-grid {
@@ -123,6 +182,12 @@
 
   .chart-card {
     padding: 20px;
+  }
+
+  .charts-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 
   .chart-bars {

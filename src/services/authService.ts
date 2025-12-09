@@ -6,7 +6,7 @@ import {
   type Unsubscribe,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import type {
   LoginCredentials,
   RegisterCredentials,
@@ -116,6 +116,76 @@ export const authService = {
         createdAt: new Date(),
         updatedAt: new Date(),
       } as User;
+    } catch (error: any) {
+      const message = getFirebaseErrorMessage(error as string | FirebaseError);
+      throw new Error(message);
+    }
+  },
+
+  async updateUserProfile(uid: string, updates: { name?: string; phone?: string }): Promise<User> {
+    try {
+      if (!uid) {
+        throw new Error("UID do usuário é obrigatório");
+      }
+
+      // Validação dos dados
+      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+        throw new Error("O nome não pode estar vazio");
+      }
+
+      if (updates.name !== undefined && updates.name.trim().length < 2) {
+        throw new Error("O nome deve ter pelo menos 2 caracteres");
+      }
+
+      if (updates.phone !== undefined && updates.phone && updates.phone.trim().length > 0) {
+        // Validação básica de telefone (remove caracteres não numéricos para validação)
+        const phoneDigits = updates.phone.replace(/\D/g, "");
+        if (phoneDigits.length < 10) {
+          throw new Error("O telefone deve ter pelo menos 10 dígitos");
+        }
+      }
+
+      const userRef = doc(db, "users", uid);
+      
+      // Verificar se o usuário existe
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        throw new Error("Usuário não encontrado");
+      }
+
+      // Preparar dados para atualização
+      const updateData: any = {
+        updatedAt: serverTimestamp(),
+      };
+
+      if (updates.name !== undefined) {
+        updateData.name = updates.name.trim();
+      }
+
+      if (updates.phone !== undefined) {
+        updateData.phone = updates.phone.trim() || "";
+      }
+
+      // Atualizar no Firestore
+      await updateDoc(userRef, updateData);
+
+      // Buscar dados atualizados
+      const updatedDoc = await getDoc(userRef);
+      const userData = updatedDoc.data();
+      
+      // Converter Timestamp do Firestore para Date
+      const user: User = {
+        uid: userData.uid || uid,
+        email: userData.email || "",
+        name: userData.name || "",
+        phone: userData.phone || "",
+        createdAt: userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(),
+        updatedAt: userData.updatedAt?.toDate ? userData.updatedAt.toDate() : new Date(),
+        lastLogin: userData.lastLogin?.toDate ? userData.lastLogin.toDate() : undefined,
+        role: userData.role || "user",
+      };
+
+      return user;
     } catch (error: any) {
       const message = getFirebaseErrorMessage(error as string | FirebaseError);
       throw new Error(message);

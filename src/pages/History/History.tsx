@@ -1,49 +1,88 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FiClock, FiShoppingBag, FiFileText } from "react-icons/fi";
+import { useAuth } from "../../hooks/useAuth";
+import { getCustomerPurchases, getCustomerServices } from "../../services/pdvService";
 import "./History.css";
 
 const History: React.FC = () => {
-  // Dados mockados - substituir por dados reais do Firebase
-  const purchases = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      service: "Lavagem Completa",
-      amount: 150.0,
-      status: "Concluído",
-    },
-    {
-      id: "2",
-      date: "2024-01-10",
-      service: "Lavagem Simples",
-      amount: 80.0,
-      status: "Concluído",
-    },
-    {
-      id: "3",
-      date: "2024-01-05",
-      service: "Lavagem Premium",
-      amount: 200.0,
-      status: "Concluído",
-    },
-  ];
+  const { user } = useAuth();
+  const [purchases, setPurchases] = useState<Array<{
+    id: string;
+    date: string;
+    service: string;
+    amount: number;
+    status: string;
+  }>>([]);
+  const [services, setServices] = useState<Array<{
+    id: string;
+    date: string;
+    type: string;
+    description: string;
+    status: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const services = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      type: "Plano Mensal",
-      description: "Plano de lavagem mensal - 4 lavagens",
-      status: "Ativo",
-    },
-    {
-      id: "2",
-      date: "2024-01-10",
-      type: "Lavagem Avulsa",
-      description: "Lavagem completa com cera",
-      status: "Concluído",
-    },
-  ];
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [purchasesData, servicesData] = await Promise.all([
+          getCustomerPurchases(user.uid),
+          getCustomerServices(user.uid),
+        ]);
+
+        setPurchases(purchasesData);
+        setServices(servicesData);
+      } catch (err) {
+        console.error("Erro ao carregar histórico:", err);
+        setError("Não foi possível carregar o histórico. Tente novamente mais tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistory();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="history-page">
+        <div className="history-header">
+          <h1 className="history-title">Histórico de Compras e Serviços</h1>
+          <p className="history-subtitle">
+            Visualize todo o seu histórico de transações e serviços contratados
+          </p>
+        </div>
+        <div className="history-loading">
+          <p>Carregando histórico...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="history-page">
+        <div className="history-header">
+          <h1 className="history-title">Histórico de Compras e Serviços</h1>
+          <p className="history-subtitle">
+            Visualize todo o seu histórico de transações e serviços contratados
+          </p>
+        </div>
+        <div className="history-error">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="history-page">

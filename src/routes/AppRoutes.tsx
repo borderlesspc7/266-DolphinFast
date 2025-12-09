@@ -14,35 +14,11 @@ import History from "../pages/History/History";
 import Profile from "../pages/Profile/Profile";
 import ContactInfo from "../pages/ContactInfo/ContactInfo";
 import PDV from "../pages/PDV/PDV";
+import AreaCliente from "../pages/AreaCliente/AreaCliente";
+import GestaoFinanceira from "../pages/GestaoFinanceira/GestaoFinanceira";
+import PlanosLavagem from "../pages/PlanosLavagem/PlanosLavagem";
 
 export const AppRoutes = () => {
-  const AreaCliente = () => {
-    return (
-      <div>
-        <h1>Área do Cliente</h1>
-        <p>Gerenciamento de clientes e relacionamento</p>
-      </div>
-    );
-  };
-
-
-  const GestaoFinanceira = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>Gestão Financeira e Contábil</h1>
-        <p>Controle financeiro e contabilidade</p>
-      </div>
-    );
-  };
-
-  const PlanosLavagem = () => {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h1>Planos de Lavagem</h1>
-        <p>Gerenciamento de planos e serviços de lavagem</p>
-      </div>
-    );
-  };
 
   const Seguranca = () => {
     return (

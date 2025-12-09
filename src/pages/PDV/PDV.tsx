@@ -11,6 +11,17 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "../../hooks/useAuth";
 import { getAllProducts } from "../../services/estoqueService";
+import { searchCustomers } from "../../services/crmService";
+import {
+  getAllServices,
+  createSale,
+  getTodayCashRegister,
+  openCashRegister,
+  closeCashRegister,
+  addSaleToCashRegister,
+  getDailyReport,
+} from "../../services/pdvService";
+import type { Customer } from "../../types/crm";
 import type { Product as EstoqueProduct } from "../../types/estoque";
 import type {
   Product,
@@ -30,41 +41,29 @@ const PDV: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [discount, setDiscount] = useState(0);
   const [customerName, setCustomerName] = useState("");
+  const [customerId, setCustomerId] = useState<string | undefined>(undefined);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+  const [showCustomerResults, setShowCustomerResults] = useState(false);
   const [estoqueProducts, setEstoqueProducts] = useState<EstoqueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-
-  // Dados mockados
-  const mockProducts: Product[] = [
-    { id: "mock_1", name: "Água Mineral", price: 3.50, category: "Bebidas", stock: 50 },
-    { id: "mock_2", name: "Refrigerante", price: 5.00, category: "Bebidas", stock: 30 },
-    { id: "mock_3", name: "Chocolate", price: 4.50, category: "Doces", stock: 25 },
-    { id: "mock_4", name: "Salgadinho", price: 3.00, category: "Salgados", stock: 40 },
-  ];
-
-  // Combinar produtos mockados com produtos do estoque
-  const products: Product[] = [
-    ...mockProducts,
-    ...estoqueProducts
-      .filter((p) => p.status === "active")
-      .map((p) => ({
-        id: `estoque_${p.id}`,
-        name: p.name,
-        price: p.unitPrice,
-        category: p.category,
-        stock: p.currentStock,
-        description: p.description,
-      })),
-  ];
-
-  const [services] = useState<Service[]>([
-    { id: "1", name: "Lavagem Simples", price: 25.00, category: "Lavagem", duration: 30 },
-    { id: "2", name: "Lavagem Completa", price: 50.00, category: "Lavagem", duration: 60 },
-    { id: "3", name: "Lavagem Premium", price: 80.00, category: "Lavagem", duration: 90 },
-    { id: "4", name: "Aspiração", price: 15.00, category: "Lavagem", duration: 15 },
-  ]);
-
-  const [sales, setSales] = useState<Sale[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
   const [cashRegister, setCashRegister] = useState<CashRegister | null>(null);
+  const [loadingCash, setLoadingCash] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  // Converter produtos do estoque para formato PDV
+  const products: Product[] = estoqueProducts
+    .filter((p) => p.status === "active")
+    .map((p) => ({
+      id: `estoque_${p.id}`,
+      name: p.name,
+      price: p.unitPrice,
+      category: p.category,
+      stock: p.currentStock,
+      description: p.description,
+    }));
 
   // Carregar produtos do estoque
   useEffect(() => {
@@ -75,6 +74,7 @@ const PDV: React.FC = () => {
         setEstoqueProducts(produtos);
       } catch (error) {
         console.error("Erro ao carregar produtos do estoque:", error);
+        setError("Erro ao carregar produtos");
       } finally {
         setLoadingProducts(false);
       }
@@ -83,28 +83,77 @@ const PDV: React.FC = () => {
     loadEstoqueProducts();
   }, []);
 
-  // Inicializar caixa do dia
+  // Carregar serviços
   useEffect(() => {
-    const today = new Date();
-    const existingCash = localStorage.getItem(`cash_register_${today.toDateString()}`);
-    
-    if (!existingCash) {
-      const newCash: CashRegister = {
-        id: `cash_${Date.now()}`,
-        date: today,
-        openingAmount: 0,
-        totalSales: 0,
-        totalPayments: { pix: 0, debito: 0, credito: 0, dinheiro: 0 },
-        sales: [],
-        status: "open",
-        employeeId: user?.uid || "",
-        employeeName: user?.name || "",
-      };
-      setCashRegister(newCash);
-      localStorage.setItem(`cash_register_${today.toDateString()}`, JSON.stringify(newCash));
-    } else {
-      setCashRegister(JSON.parse(existingCash));
-    }
+    const loadServices = async () => {
+      try {
+        setLoadingServices(true);
+        const servicos = await getAllServices();
+        setServices(servicos);
+      } catch (error) {
+        console.error("Erro ao carregar serviços:", error);
+        setError("Erro ao carregar serviços");
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+
+    loadServices();
+  }, []);
+
+  // Buscar clientes ao digitar
+  useEffect(() => {
+    const searchCustomersAsync = async () => {
+      if (customerSearch.trim().length >= 2) {
+        try {
+          const results = await searchCustomers(customerSearch);
+          setCustomerResults(results);
+          setShowCustomerResults(true);
+        } catch (error) {
+          console.error("Erro ao buscar clientes:", error);
+          setCustomerResults([]);
+        }
+      } else {
+        setCustomerResults([]);
+        setShowCustomerResults(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchCustomersAsync, 300);
+    return () => clearTimeout(timeoutId);
+  }, [customerSearch]);
+
+  // Carregar ou criar caixa do dia
+  useEffect(() => {
+    const loadCashRegister = async () => {
+      if (!user?.uid) return;
+
+      try {
+        setLoadingCash(true);
+        let cash = await getTodayCashRegister(user.uid);
+
+        if (!cash) {
+          // Criar novo caixa se não existir
+          const cashId = await openCashRegister(
+            user.uid,
+            user.name || "",
+            0
+          );
+          cash = await getTodayCashRegister(user.uid);
+        }
+
+        if (cash) {
+          setCashRegister(cash);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar caixa:", error);
+        setError("Erro ao carregar informações do caixa");
+      } finally {
+        setLoadingCash(false);
+      }
+    };
+
+    loadCashRegister();
   }, [user]);
 
   const filteredProducts = products.filter(
@@ -155,16 +204,15 @@ const PDV: React.FC = () => {
     }
   };
 
-  // Função para recarregar produtos do estoque (útil após vendas)
-  // Pode ser usada no futuro quando integrarmos atualização de estoque após vendas
-  // const reloadEstoqueProducts = async () => {
-  //   try {
-  //     const produtos = await getAllProducts();
-  //     setEstoqueProducts(produtos);
-  //   } catch (error) {
-  //     console.error("Erro ao recarregar produtos do estoque:", error);
-  //   }
-  // };
+  // Função para recarregar produtos do estoque após vendas
+  const reloadEstoqueProducts = async () => {
+    try {
+      const produtos = await getAllProducts();
+      setEstoqueProducts(produtos);
+    } catch (error) {
+      console.error("Erro ao recarregar produtos do estoque:", error);
+    }
+  };
 
   const updateQuantity = (id: string, type: "product" | "service", delta: number) => {
     setCart(
@@ -210,73 +258,105 @@ const PDV: React.FC = () => {
       return;
     }
 
-    const sale: Sale = {
-      id: `sale_${Date.now()}`,
-      date: new Date(),
-      items: [...cart],
-      subtotal,
-      discount: discount > 0 ? discount : undefined,
-      total,
-      payment: {
-        method: paymentMethod,
-        amount: total,
-      },
-      customerName: customerName || undefined,
-      employeeId: user?.uid || "",
-      employeeName: user?.name || "",
-      status: "completed",
-    };
-
-    // Adicionar venda ao histórico
-    setSales([...sales, sale]);
-
-    // Atualizar caixa
-    if (cashRegister) {
-      const updatedCash: CashRegister = {
-        ...cashRegister,
-        totalSales: cashRegister.totalSales + total,
-        totalPayments: {
-          ...cashRegister.totalPayments,
-          [paymentMethod]: cashRegister.totalPayments[paymentMethod] + total,
-        },
-        sales: [...cashRegister.sales, sale],
-      };
-      setCashRegister(updatedCash);
-      localStorage.setItem(
-        `cash_register_${new Date().toDateString()}`,
-        JSON.stringify(updatedCash)
-      );
+    if (!user?.uid || !cashRegister) {
+      alert("Erro: usuário ou caixa não encontrado!");
+      return;
     }
 
-    // Limpar carrinho
-    setCart([]);
-    setDiscount(0);
-    setCustomerName("");
-    setPaymentMethod("pix");
+    try {
+      setError("");
 
-    alert("Venda realizada com sucesso!");
+      const saleData: Omit<Sale, "id"> = {
+        date: new Date(),
+        items: [...cart],
+        subtotal,
+        discount: discount > 0 ? discount : undefined,
+        total,
+        payment: {
+          method: paymentMethod,
+          amount: total,
+        },
+        customerId: customerId || undefined,
+        customerName: customerName || undefined,
+        employeeId: user.uid,
+        employeeName: user.name || "",
+        status: "completed",
+      };
+
+      // Criar venda no Firestore (já atualiza o estoque automaticamente)
+      const saleId = await createSale(saleData, user.uid);
+
+      // Adicionar venda ao caixa
+      const saleWithId: Sale = {
+        ...saleData,
+        id: saleId,
+      };
+      await addSaleToCashRegister(cashRegister.id, saleWithId);
+
+      // Recarregar caixa atualizado
+      const updatedCash = await getTodayCashRegister(user.uid);
+      if (updatedCash) {
+        setCashRegister(updatedCash);
+      }
+
+      // Recarregar produtos para atualizar estoque na tela
+      await reloadEstoqueProducts();
+
+      // Limpar carrinho
+      setCart([]);
+      setDiscount(0);
+      setCustomerName("");
+      setCustomerId(undefined);
+      setCustomerSearch("");
+      setCustomerResults([]);
+      setShowCustomerResults(false);
+      setPaymentMethod("pix");
+
+      alert("Venda realizada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao finalizar venda:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao finalizar venda. Tente novamente.";
+      setError(errorMessage);
+      alert(errorMessage);
+    }
   };
 
-  const handleCloseCash = () => {
+  const handleCloseCash = async () => {
     if (!cashRegister || cashRegister.status === "closed") {
       alert("Caixa já está fechado!");
       return;
     }
 
-    const closingAmount = cashRegister.openingAmount + cashRegister.totalSales;
-    const updatedCash: CashRegister = {
-      ...cashRegister,
-      closingAmount,
-      status: "closed",
-    };
+    if (!user?.uid) {
+      alert("Erro: usuário não encontrado!");
+      return;
+    }
 
-    setCashRegister(updatedCash);
-    localStorage.setItem(
-      `cash_register_${new Date().toDateString()}`,
-      JSON.stringify(updatedCash)
-    );
+    try {
+      setError("");
 
-    alert("Caixa fechado com sucesso!");
+      const closingAmount = cashRegister.openingAmount + cashRegister.totalSales;
+      await closeCashRegister(cashRegister.id, closingAmount);
+
+      // Recarregar caixa atualizado
+      const updatedCash = await getTodayCashRegister(user.uid);
+      if (updatedCash) {
+        setCashRegister(updatedCash);
+      }
+
+      alert("Caixa fechado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao fechar caixa:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao fechar caixa. Tente novamente.";
+      setError(errorMessage);
+      alert(errorMessage);
+    }
   };
 
   const getTodaySales = () => {
@@ -289,6 +369,17 @@ const PDV: React.FC = () => {
       <div className="pdv-header">
         <h1 className="pdv-title">PDV - Ponto de Venda</h1>
         <p className="pdv-subtitle">Gerencie vendas, pagamentos e caixa</p>
+        {error && (
+          <div className="pdv-error-message" style={{ 
+            marginTop: '10px', 
+            padding: '10px', 
+            backgroundColor: '#fee', 
+            color: '#c33', 
+            borderRadius: '4px' 
+          }}>
+            {error}
+          </div>
+        )}
       </div>
 
       <div className="pdv-tabs">
@@ -370,9 +461,17 @@ const PDV: React.FC = () => {
               </div>
 
               <div className="pdv-section">
-                <h3 className="pdv-section-title">Serviços</h3>
-                <div className="pdv-items-grid">
-                  {filteredServices.map((service) => (
+                <div className="pdv-section-header">
+                  <h3 className="pdv-section-title">Serviços</h3>
+                  {loadingServices && (
+                    <span className="pdv-loading-text">Carregando serviços...</span>
+                  )}
+                </div>
+                {filteredServices.length === 0 && !loadingServices ? (
+                  <p className="pdv-no-items">Nenhum serviço encontrado</p>
+                ) : (
+                  <div className="pdv-items-grid">
+                    {filteredServices.map((service) => (
                     <div key={service.id} className="pdv-item-card">
                       <div className="pdv-item-info">
                         <h4 className="pdv-item-name">{service.name}</h4>
@@ -394,7 +493,8 @@ const PDV: React.FC = () => {
                       </button>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -496,13 +596,70 @@ const PDV: React.FC = () => {
                 </div>
 
                 <div className="pdv-customer-section">
-                  <input
-                    type="text"
-                    placeholder="Nome do cliente (opcional)"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="pdv-customer-input"
-                  />
+                  <div className="pdv-customer-search-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Buscar cliente por nome, telefone ou email..."
+                      value={customerSearch}
+                      onChange={(e) => {
+                        setCustomerSearch(e.target.value);
+                        if (e.target.value.trim().length === 0) {
+                          setCustomerName("");
+                          setCustomerId(undefined);
+                        }
+                      }}
+                      onFocus={() => {
+                        if (customerResults.length > 0) {
+                          setShowCustomerResults(true);
+                        }
+                      }}
+                      className="pdv-customer-input"
+                    />
+                    {showCustomerResults && customerResults.length > 0 && (
+                      <div className="pdv-customer-results">
+                        {customerResults.map((customer) => (
+                          <div
+                            key={customer.id}
+                            className="pdv-customer-result-item"
+                            onClick={() => {
+                              setCustomerName(customer.name);
+                              setCustomerId(customer.id);
+                              setCustomerSearch(customer.name);
+                              setShowCustomerResults(false);
+                            }}
+                          >
+                            <div className="pdv-customer-result-name">
+                              {customer.name}
+                            </div>
+                            <div className="pdv-customer-result-info">
+                              {customer.phone && (
+                                <span>{customer.phone}</span>
+                              )}
+                              {customer.email && (
+                                <span>{customer.email}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {customerName && (
+                    <div className="pdv-selected-customer">
+                      Cliente selecionado: <strong>{customerName}</strong>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomerName("");
+                          setCustomerId(undefined);
+                          setCustomerSearch("");
+                        }}
+                        className="pdv-clear-customer"
+                      >
+                        <FiX size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <button className="pdv-finish-button" onClick={handlePayment}>
@@ -517,7 +674,9 @@ const PDV: React.FC = () => {
 
       {activeTab === "caixa" && (
         <div className="pdv-cash-section">
-          {cashRegister ? (
+          {loadingCash ? (
+            <p>Carregando informações do caixa...</p>
+          ) : cashRegister ? (
             <div className="pdv-cash-info">
               <div className="pdv-cash-card">
                 <h3 className="pdv-cash-card-title">Informações do Caixa</h3>
@@ -597,8 +756,9 @@ const PDV: React.FC = () => {
               </div>
             </div>
           ) : (
-            <p>Carregando informações do caixa...</p>
+            <p>Nenhum caixa encontrado para hoje. Um novo caixa será criado automaticamente.</p>
           )}
+          {error && <p className="pdv-error">{error}</p>}
         </div>
       )}
 

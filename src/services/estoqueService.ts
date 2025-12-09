@@ -157,7 +157,8 @@ export const getLowStockProducts = async (): Promise<Product[]> => {
 // ==================== MOVIMENTAÇÕES DE ESTOQUE ====================
 
 export const createStockMovement = async (
-  movementData: StockMovementFormData
+  movementData: StockMovementFormData,
+  userId?: string
 ): Promise<string> => {
   try {
     // Buscar produto atual
@@ -196,12 +197,16 @@ export const createStockMovement = async (
     const totalValue =
       (movementData.unitPrice || product.costPrice) * movementData.quantity;
 
+    if (!userId) {
+      throw new Error("ID do usuário é obrigatório para criar movimentação de estoque");
+    }
+
     const newMovement = {
       ...movementData,
       previousStock,
       newStock,
       totalValue,
-      responsibleUser: "current-user", // TODO: pegar do contexto de autenticação
+      responsibleUser: userId,
       createdAt: new Date().toISOString(),
     };
 

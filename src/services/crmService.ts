@@ -110,20 +110,50 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
 
 export const getActiveCustomers = async (): Promise<Customer[]> => {
   try {
+    // Buscar todos os clientes e filtrar em memória para evitar necessidade de índice composto
     const q = query(
       collection(db, CUSTOMERS_COLLECTION),
-      where("active", "==", true),
       orderBy("createdAt", "desc")
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Customer[];
+    // Filtrar apenas clientes ativos em memória
+    return querySnapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .filter((customer) => customer.active === true) as Customer[];
   } catch (error) {
     console.error("Erro ao buscar clientes ativos:", error);
     throw new Error("Não foi possível buscar os clientes ativos");
+  }
+};
+
+export const searchCustomers = async (
+  searchTerm: string
+): Promise<Customer[]> => {
+  try {
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      return [];
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    
+    // Buscar todos os clientes ativos e filtrar em memória
+    // (Firestore não suporta busca case-insensitive nativa)
+    const allCustomers = await getActiveCustomers();
+    
+    return allCustomers.filter((customer) => {
+      const nameMatch = customer.name.toLowerCase().includes(term);
+      const phoneMatch = customer.phone?.toLowerCase().includes(term);
+      const emailMatch = customer.email?.toLowerCase().includes(term);
+      
+      return nameMatch || phoneMatch || emailMatch;
+    }).slice(0, 10); // Limitar a 10 resultados
+  } catch (error) {
+    console.error("Erro ao buscar clientes:", error);
+    throw new Error("Não foi possível buscar os clientes");
   }
 };
 
@@ -391,5 +421,52 @@ export const sendCommunication = async (id: string): Promise<void> => {
   } catch (error) {
     console.error("Erro ao enviar comunicação:", error);
     throw new Error("Não foi possível enviar a comunicação");
+  }
+};
+
+// ==================== FUNÇÕES PARA DASHBOARD ====================
+
+/**
+ * Conta o total de clientes ativos
+ */
+export const getActiveCustomersCount = async (): Promise<number> => {
+  try {
+    const activeCustomers = await getActiveCustomers();
+    return activeCustomers.length;
+  } catch (error) {
+    console.error("Erro ao contar clientes ativos:", error);
+    throw new Error("Não foi possível contar os clientes ativos");
+  }
+};
+
+/**
+ * Busca promoções que estão próximas de vencer (nos próximos 7 dias por padrão)
+ */
+export const getExpiringPromotions = async (
+  days: number = 7
+): Promise<Promotion[]> => {
+  try {
+    const now = new Date();
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + days);
+
+    const allPromotions = await getAllPromotions();
+
+    return allPromotions.filter((promotion) => {
+      if (!promotion.active) return false;
+
+      const validUntil = new Date(promotion.validUntil);
+      const validFrom = new Date(promotion.validFrom);
+
+      // Promoção está ativa e vence nos próximos X dias
+      return (
+        now >= validFrom &&
+        validUntil <= expirationDate &&
+        validUntil >= now
+      );
+    });
+  } catch (error) {
+    console.error("Erro ao buscar promoções a vencer:", error);
+    throw new Error("Não foi possível buscar as promoções a vencer");
   }
 };

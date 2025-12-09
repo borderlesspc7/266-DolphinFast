@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   FiPackage,
   FiTrendingUp,
   FiAlertTriangle,
   FiBarChart2,
 } from "react-icons/fi";
+import { useAuth } from "../../hooks/useAuth";
 import ProductForm from "../../components/estoque/ProductForm";
 import ProductList from "../../components/estoque/ProductList";
 import StockMovementSection from "../../components/estoque/StockMovementSection";
@@ -32,6 +33,7 @@ import {
 import "./Estoque.css";
 
 const Estoque: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("products");
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(
@@ -49,6 +51,17 @@ const Estoque: React.FC = () => {
     loadAlerts();
   }, []);
 
+  // Carregar dados quando a aba ativa mudar
+  useEffect(() => {
+    if (activeTab === "movements") {
+      loadMovements();
+    } else if (activeTab === "alerts") {
+      loadAlerts();
+    } else if (activeTab === "reports" && !reportData) {
+      loadReport();
+    }
+  }, [activeTab]);
+
   const loadProducts = async () => {
     try {
       const data = await getAllProducts();
@@ -58,7 +71,7 @@ const Estoque: React.FC = () => {
     }
   };
 
-  const loadMovements = async (
+  const loadMovements = useCallback(async (
     productId?: string,
     startDate?: string,
     endDate?: string
@@ -69,16 +82,16 @@ const Estoque: React.FC = () => {
     } catch {
       setError("Erro ao carregar movimentações");
     }
-  };
+  }, []);
 
-  const loadAlerts = async (status?: "active" | "resolved" | "ignored") => {
+  const loadAlerts = useCallback(async (status?: "active" | "resolved" | "ignored") => {
     try {
       const data = await getStockAlerts(status);
       setAlerts(data);
     } catch {
       setError("Erro ao carregar alertas");
     }
-  };
+  }, []);
 
   const loadReport = async () => {
     try {
@@ -217,7 +230,11 @@ const Estoque: React.FC = () => {
   // Movimentações
   const handleCreateMovement = async (data: StockMovementFormData) => {
     try {
-      await createStockMovement(data);
+      if (!user?.uid) {
+        setError("Usuário não autenticado");
+        return;
+      }
+      await createStockMovement(data, user.uid);
       await loadMovements();
       await loadProducts();
       await loadAlerts();

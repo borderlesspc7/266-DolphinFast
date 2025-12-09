@@ -446,3 +446,82 @@ const determineTimeRecordStatus = (
 
   return "present";
 };
+
+// ==================== FUNÇÕES PARA DASHBOARD ====================
+
+/**
+ * Busca funcionários que estão atrasados hoje (não registraram entrada ou registraram após o horário)
+ */
+export const getLateEmployees = async (): Promise<
+  Array<{
+    employeeId: string;
+    employeeName: string;
+    expectedTime: string;
+    clockInTime?: string;
+    status: "absent" | "late";
+  }>
+> => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const activeEmployees = await getActiveEmployees();
+
+    // Buscar registros de ponto de hoje
+    const todayRecords = await getTimeRecords(undefined, today, today);
+
+    // Criar mapa de registros por funcionário
+    const recordsMap = new Map<string, TimeRecord>();
+    todayRecords.forEach((record) => {
+      recordsMap.set(record.employeeId, record);
+    });
+
+    const lateEmployees: Array<{
+      employeeId: string;
+      employeeName: string;
+      expectedTime: string;
+      clockInTime?: string;
+      status: "absent" | "late";
+    }> = [];
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    activeEmployees.forEach((employee) => {
+      const record = recordsMap.get(employee.id);
+      const expectedStart = employee.workSchedule.startTime; // HH:MM
+      const [expectedHour, expectedMinute] = expectedStart.split(":").map(Number);
+
+      // Verificar se já passou do horário esperado (com tolerância de 15 minutos)
+      const expectedTime = new Date();
+      expectedTime.setHours(expectedHour, expectedMinute, 0, 0);
+      const toleranceTime = new Date(expectedTime);
+      toleranceTime.setMinutes(toleranceTime.getMinutes() + 15);
+
+      if (now > toleranceTime) {
+        if (!record || !record.clockIn) {
+          // Funcionário ausente
+          lateEmployees.push({
+            employeeId: employee.id,
+            employeeName: employee.name,
+            expectedTime: expectedStart,
+            status: "absent",
+          });
+        } else if (record.status === "late") {
+          // Funcionário atrasado
+          lateEmployees.push({
+            employeeId: employee.id,
+            employeeName: employee.name,
+            expectedTime: expectedStart,
+            clockInTime: record.clockIn,
+            status: "late",
+          });
+        }
+      }
+    });
+
+    return lateEmployees;
+  } catch (error) {
+    console.error("Erro ao buscar funcionários atrasados:", error);
+    throw new Error("Não foi possível buscar os funcionários atrasados");
+  }
+};

@@ -241,3 +241,49 @@
     height: 38px;
   }
 }
+
+/* Loading state */
+.summary-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.summary-card.loading .card-title,
+.summary-card.loading .card-value {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  color: transparent;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Error state */
+.error-message {
+  padding: 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  text-align: center;
+  font-weight: 500;
+}
+
+.card-change.neutral {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.1);
+}
+
+.card-change.neutral::before {
+  content: "→";
+  font-size: 10px;
+}

@@ -96,6 +96,21 @@
   color: #334155;
 }
 
+.alerts-loading,
+.alerts-error,
+.alerts-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.alerts-error {
+  color: #ef4444;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .alert-item {
